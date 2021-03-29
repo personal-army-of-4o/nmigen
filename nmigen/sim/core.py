@@ -6,7 +6,7 @@ from ..hdl.ir import *
 from ._base import BaseEngine
 
 
-__all__ = ["Settle", "Delay", "Tick", "Passive", "Active", "Simulator"]
+__all__ = ["Settle", "Delay", "InactiveEdge", "Tick", "Passive", "Active", "Simulator"]
 
 
 class Command:
@@ -28,6 +28,16 @@ class Delay(Command):
         else:
             return "(delay {:.3}us)".format(self.interval * 1e6)
 
+class InactiveEdge(Command):
+    def __init__(self, domain="sync"):
+        if not isinstance(domain, (str, ClockDomain)):
+            raise TypeError("Domain must be a string or a ClockDomain instance, not {!r}"
+                            .format(domain))
+        assert domain != "comb"
+        self.domain = domain
+
+    def __repr__(self):
+        return "(tick {})".format(self.domain)
 
 class Tick(Command):
     def __init__(self, domain="sync"):

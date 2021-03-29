@@ -2,7 +2,7 @@ import inspect
 
 from ..hdl import *
 from ..hdl.ast import Statement, SignalSet
-from .core import Tick, Settle, Delay, Passive, Active
+from .core import InactiveEdge, Tick, Settle, Delay, Passive, Active
 from ._base import BaseProcess
 from ._pyrtl import _ValueCompiler, _RHSValueCompiler, _StatementCompiler
 
@@ -86,6 +86,21 @@ class PyCoroProcess(BaseProcess):
                                         "domain {!r} from process {!r}"
                                         .format(command, command.domain, self.src_loc()))
                     self.add_trigger(domain.clk, trigger=1 if domain.clk_edge == "pos" else 0)
+                    if domain.rst is not None and domain.async_reset:
+                        self.add_trigger(domain.rst, trigger=1)
+                    return
+
+                elif type(command) is InactiveEdge:
+                    domain = command.domain
+                    if isinstance(domain, ClockDomain):
+                        pass
+                    elif domain in self.domains:
+                        domain = self.domains[domain]
+                    else:
+                        raise NameError("Received command {!r} that refers to a nonexistent "
+                                        "domain {!r} from process {!r}"
+                                        .format(command, command.domain, self.src_loc()))
+                    self.add_trigger(domain.clk, trigger=0 if domain.clk_edge == "pos" else 1)
                     if domain.rst is not None and domain.async_reset:
                         self.add_trigger(domain.rst, trigger=1)
                     return
