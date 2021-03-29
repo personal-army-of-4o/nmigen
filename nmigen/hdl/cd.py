@@ -47,7 +47,7 @@ class ClockDomain:
         else:
             return "{}_{}".format(domain_name, signal_name)
 
-    def __init__(self, name=None, *, clk_edge="pos", reset_less=False, async_reset=False, reset_active_lvl=1,
+    def __init__(self, name=None, *, clk_edge="pos", reset_less=False, async_reset=True, reset_active_lvl=0,
                  local=False):
         if name is None:
             try:
