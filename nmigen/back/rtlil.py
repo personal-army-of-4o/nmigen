@@ -991,7 +991,12 @@ def _convert_fragment(builder, fragment, name_map, hierarchy):
                     triggers = []
                     triggers.append((cd.clk_edge + "edge", compiler_state.resolve_curr(cd.clk)))
                     if cd.async_reset:
-                        triggers.append(("posedge", compiler_state.resolve_curr(cd.rst)))
+                        if cd.reset_active_lvl == 1:
+                            triggers.append(("posedge", compiler_state.resolve_curr(cd.rst)))
+                        elif cd.reset_active_lvl == 0:
+                            triggers.append(("negedge", compiler_state.resolve_curr(cd.rst)))
+                        else:
+                            raise Exception("invalid reset_active_lvl: " + str(cd.reset_active_lvl))
 
                     for trigger in triggers:
                         with process.sync(*trigger) as sync:
